@@ -1,9 +1,9 @@
 version: 0.2
 env:
   secrets-manager:
-    sonar_username: "SonarQubeUserSecret-4A0b7f6V9LNs:username"
-    sonar_password: "SonarQubeUserSecret-4A0b7f6V9LNs:password"
-    fortify_SSC_CIToken: "telematics/fortifyssc:CIToken"
+    sonar_username: "xxxxxx"
+    sonar_password: "xxxxxx"
+    fortify_SSC_CIToken: "xxxxx"
   variables:
     repo_name: "telematics.realtime.alerts"
     fortify_app_version_id: "11"
