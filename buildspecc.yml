@@ -1,0 +1,38 @@
+version: 0.2
+phases:
+  pre_build:
+    commands:
+      - echo prebuild started...
+
+  build:
+    commands:
+      - echo Build started on `date`
+      - pwd
+      - cd realtimealerts
+      - oldversion=$(cat  update_properties_request.json |grep CurrentApplicationVersionId |cut -c 36-38)
+      - newversion=$(aws kinesisanalyticsv2 describe-application --cli-input-json file://describe_properties_request.json |grep ApplicationVersionId |cut -c 33-34)
+      - sed -i "s/$oldversion/$newversion/g" update_properties_request.json
+      - aws kinesisanalyticsv2 update-application --cli-input-json file://update_properties_request.json
+      - cd ..
+      - pwd
+      - cd kinesistimestream
+      - oldversion=$(cat  update_properties_request.json |grep CurrentApplicationVersionId |cut -c 36-38)
+      - newversion=$(aws kinesisanalyticsv2 describe-application --cli-input-json file://describe_properties_request.json |grep ApplicationVersionId |cut -c 33-34)
+      - sed -i "s/$oldversion/$newversion/g" update_properties_request.json
+      - aws kinesisanalyticsv2 update-application --cli-input-json file://update_properties_request.json
+      - cd ..
+      - pwd
+      - cd timestream-injector
+      - oldversion=$(cat  update_properties_request.json |grep CurrentApplicationVersionId |cut -c 36-38)
+      - newversion=$(aws kinesisanalyticsv2 describe-application --cli-input-json file://describe_properties_request.json |grep ApplicationVersionId |cut -c 33-34)
+      - sed -i "s/$oldversion/$newversion/g" update_properties_request.json
+      - aws kinesisanalyticsv2 update-application --cli-input-json file://update_properties_request.json
+      - cd ..
+      - pwd
+      - cd timestream-migrator
+      - oldversion=$(cat  update_properties_request.json |grep CurrentApplicationVersionId |cut -c 36-38)
+      - newversion=$(aws kinesisanalyticsv2 describe-application --cli-input-json file://describe_properties_request.json |grep ApplicationVersionId |cut -c 33-34)
+      - sed -i "s/$oldversion/$newversion/g" update_properties_request.json
+      - aws kinesisanalyticsv2 update-application --cli-input-json file://update_properties_request.json
+      - cd ..
+      - pwd
