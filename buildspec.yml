@@ -1,0 +1,47 @@
+version: 0.2
+env:
+  secrets-manager:
+    sonar_username: "SonarQubeUserSecret-4A0b7f6V9LNs:username"
+    sonar_password: "SonarQubeUserSecret-4A0b7f6V9LNs:password"
+    fortify_SSC_CIToken: "telematics/fortifyssc:CIToken"
+  variables:
+    repo_name: "telematics.realtime.alerts"
+    fortify_app_version_id: "11"
+phases:
+  pre_build:
+    commands:
+      - echo Scanning through Fortify....
+      #- bash -x fortify_sast_local_java_template.bash
+      - echo sonarqube pre_build_steps
+      - sonar_host_url="https://sonarqube.hercrentals.com"
+      - TAG="1-0-SNAPSHOT-$CODEBUILD_BUILD_NUMBER-$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)"
+      - IMAGE_TAG=${TAG:=latest}
+  build:
+    commands:
+      - echo Build started on `date`
+      - echo Scanning through Fortify....
+      - export CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain telematics-domain --domain-owner 567234402044 --query authorizationToken --output text` 
+      - echo $CODEARTIFACT_AUTH_TOKEN
+      - mvn clean
+      - mvn -s codebuild-maven-settings.xml install sonar:sonar -Dsonar.projectKey=$repo_name -Dsonar.host.url=$sonar_host_url -Dsonar.login=$sonar_username -Dsonar.password=$sonar_password -DskipTests=false
+      - aws s3 cp target/realtime-alerts-1.0-SNAPSHOT.jar s3://dev.telematics.inartifacts/lambda_function/telematics.realtime.alerts/realtime-alerts-${IMAGE_TAG}.jar
+      - aws s3 cp target/realtime-alerts-1.0-SNAPSHOT.jar s3://dev.telematics.inartifacts/lambda_function/telematics.realtime.alerts/realtime-alerts-latest.jar
+      - oldversion=$(cat  update_properties_request.json |grep CurrentApplicationVersionId |cut -c 36-38)
+      - newversion=$(aws kinesisanalyticsv2 describe-application --cli-input-json file://describe_properties_request.json |grep ApplicationVersionId |cut -c 33-35)
+      - echo $oldversion
+      - echo $newversion
+      - echo 'Before Changing the version'
+      - cat update_properties_request.json
+      - sed -i "s/$oldversion/$newversion/g" update_properties_request.json
+      - echo 'After changing the version'
+      - cat update_properties_request.json
+      - aws kinesisanalyticsv2 update-application --cli-input-json file://update_properties_request.json
+      #- aws kinesisanalyticsv2 start-application --cli-input-json file://start_request.json
+artifacts:
+  files:
+    - "packaged.yaml"
+    - target/realtime-alerts-1.0-SNAPSHOT.jar
+  discard-paths: yes
+cache:
+  paths:
+  - '/root/.m2/**/*'
