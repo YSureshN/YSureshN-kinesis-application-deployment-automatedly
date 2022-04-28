@@ -1,0 +1,14 @@
+{
+    "ApplicationName": "dev-telematics-alerts",
+    "CurrentApplicationVersionId": 114,
+    "ApplicationConfigurationUpdate": {
+        "ApplicationCodeConfigurationUpdate": {
+            "CodeContentUpdate": {
+                "S3ContentLocationUpdate": {
+                    "BucketARNUpdate": "arn:aws:s3:::dev.telematics.inartifacts",
+                    "FileKeyUpdate": "lambda_function/telematics.realtime.alerts/realtime-alerts-latest.jar"
+                }
+            }
+        }
+    }
+}
