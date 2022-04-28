@@ -1,0 +1,1 @@
+# YSureshN-kinesis-application-deployment-automatedly
